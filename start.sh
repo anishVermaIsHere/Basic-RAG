@@ -1,0 +1,1 @@
+uv run fastapi dev src/rag_app/main.py
