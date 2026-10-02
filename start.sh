@@ -1,1 +1,1 @@
-uv run fastapi dev src/rag_app/main.py
+uv run fastapi dev src/app/main.py

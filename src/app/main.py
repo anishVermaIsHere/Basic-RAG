@@ -1,6 +1,8 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.document_upload import router as document_router
+
 app = FastAPI(title="Basic RAG App")
 app.add_middleware(
     CORSMiddleware,
@@ -18,5 +20,7 @@ def read_root():
     return {"Hello": "World"}
 
 
+app_router.include_router(document_router)
 app.include_router(app_router)
+
 
