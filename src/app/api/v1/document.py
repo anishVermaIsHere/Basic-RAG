@@ -1,13 +1,15 @@
 import uuid
 
 from openai import OpenAI
-from fastapi import APIRouter, Request, Depends, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
-from app.pipeline.loader import load_document
-from app.pipeline.chunking import chunk_text
-from app.pipeline.embedding import create_embedding
-from app.core.config import settings
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.pipeline.ingestion import ingest_document
+from app.core.config import settings
+from app.db.database import get_db
+from app.db.models import Document, DocChunk
 
 router = APIRouter(prefix="/upload", tags=["File/Documents"])
 
@@ -26,16 +28,14 @@ def send_message(text: str):
 
     return response.choices[0].message.content
 
-@router.get("/", summary="Upload document", description="Accepts a file path and return file content.")
-def upload_file():
-    text = load_document("src/app/data/documents/sample-document.md")
-    chunks = chunk_text(text)
-    text_embedding = create_embedding(chunks[0])
-    # text_embedding = send_message('Which model you are using right now?')
-    print('embedding reponse', text_embedding)
 
-    return { 
-        "chunks": chunks[0],
-        "text_embedding": text_embedding 
+@router.get("/", summary="Upload document", description="Accepts a file path and return file content.")
+async def upload_file(db: AsyncSession = Depends(get_db)):
+
+    chunks_count = await ingest_document(session=db, file_path="src/app/data/documents/sample-document.md")
+
+    return {
+        "message": "Document upload and ingested successfully",
+        "chunks_count": chunks_count
     }
 

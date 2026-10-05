@@ -1,4 +1,3 @@
-
 def chunk_text(text: str, chunk_size: int = 100, overlap: int = 50) -> list[str]:
     if not text:
         raise("text is missing")

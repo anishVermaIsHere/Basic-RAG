@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.orm import configure_mappers
 
 from app.db.database import init_db, close_db
-from app.api.v1.document_upload import router as document_router
+from app.api.v1.document import router as document_router
 
 
 
