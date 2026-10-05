@@ -19,4 +19,4 @@ ENV/
 env.bak/
 venv.bak/
 
-README.txt
+docs/*.md
