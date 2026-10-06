@@ -3,9 +3,8 @@ from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.document import DocumentService
-from app.pipeline.loader import load_document
-from app.pipeline.chunking import chunk_text
-from app.pipeline.embedding import EmbeddingModel
+from app.pipeline import load_document, chunk_text, EmbeddingModel
+
 
 
 
@@ -27,7 +26,7 @@ async def ingest_document(session: AsyncSession, file_path: str):
 
     document_service = DocumentService()
     doc = await document_service.create(session, "SampleDocument", Path(file_path))
-    print("DOCUMENT", doc)
+
     if not doc:
          raise HTTPException(status_code=404, detail="DB not found")
 

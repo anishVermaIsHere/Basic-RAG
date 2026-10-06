@@ -1,8 +1,8 @@
 
 from pathlib import Path
 
-from app.pipeline.chunking import chunk_text
-from app.pipeline.embedding import EmbeddingModel
+from app.pipeline import chunk_text
+from app.pipeline import EmbeddingModel
 
 
 def test_embed_text():

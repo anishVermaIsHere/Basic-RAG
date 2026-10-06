@@ -1,5 +1,5 @@
 
-from app.pipeline.chunking import chunk_text
+from app.pipeline import chunk_text
 
 def test_chunk_text():
     text = "G" * 1000

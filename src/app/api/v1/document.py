@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.pipeline.ingestion import ingest_document
+from app.pipeline import ingest_document
 from app.core.config import settings
 from app.db.database import get_db
 from app.db.models import Document, DocChunk

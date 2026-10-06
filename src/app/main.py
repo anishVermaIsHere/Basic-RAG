@@ -5,6 +5,8 @@ from sqlalchemy.orm import configure_mappers
 
 from app.db.database import init_db, close_db
 from app.api.v1.document import router as document_router
+from app.api.v1.query import router as query_router
+
 
 
 
@@ -38,6 +40,7 @@ def read_root():
 
 
 app_router.include_router(document_router)
+app_router.include_router(query_router)
 app.include_router(app_router)
 
 
