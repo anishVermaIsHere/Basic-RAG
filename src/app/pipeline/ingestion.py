@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.document import DocumentService
+from app.services.document_service import DocumentService
 from app.pipeline import load_document, chunk_text, EmbeddingModel
 
 

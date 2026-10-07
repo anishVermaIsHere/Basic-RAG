@@ -4,8 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.query import QueryPayload
 from app.db.database import get_db
-from app.pipeline import retrieve_chunks, context_build
-
+from app.pipeline import retrieve_chunks, context_build, Generator
 
 router = APIRouter(prefix="/search", tags=["Query"])
 
@@ -25,8 +24,15 @@ async def search_query(req: Request, payload: QueryPayload, db: AsyncSession = D
         for chunk in chunks
     ] 
 
-    doc = context_build(data)
+    context = context_build(data)
 
-    return { 
-        "data": doc
+    generator = Generator()
+
+    answer = await generator.generate(
+        question=query,
+        context=context,
+    )
+
+    return {
+        "answer": answer,
     }

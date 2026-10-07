@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.orm import configure_mappers
 
 from app.db.database import init_db, close_db
+from app.api.v1.health import router as health_router
 from app.api.v1.document import router as document_router
 from app.api.v1.query import router as query_router
 
@@ -31,14 +32,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app_router = APIRouter(prefix="/api/v1")
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"message": "Hi, RAG application running..."}
 
 
+app_router.include_router(health_router)
 app_router.include_router(document_router)
 app_router.include_router(query_router)
 app.include_router(app_router)
