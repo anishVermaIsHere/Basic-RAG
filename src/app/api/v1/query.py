@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.query import QueryPayload
 from app.db.database import get_db
-from app.pipeline import retrieve_chunks, context_build, Generator
+from app.pipeline import hybrid_retrieve, context_build, Generator
 
 router = APIRouter(prefix="/search", tags=["Query"])
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/search", tags=["Query"])
 @router.post("", summary="Search Query", description="Accepts user query and return relevant response.")
 async def search_query(req: Request, payload: QueryPayload, db: AsyncSession = Depends(get_db)):
     query = payload.content
-    chunks = await retrieve_chunks(db, query)
+    chunks = await hybrid_retrieve(db, query)
 
     data = [
         {

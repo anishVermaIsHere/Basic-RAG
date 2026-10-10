@@ -4,7 +4,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services import DocumentService, EmbeddingService
 from app.pipeline import load_document, chunk_text
-from app.utils.document.process_embed import process_embed
 
 
 
@@ -29,17 +28,15 @@ async def ingest_document(session: AsyncSession, file_path: str):
             })
 
     chunk_texts = [c["content"] for c in all_chunks]
-    # embedding_model = EmbeddingService()
-    # embeddings = embedding_model.embed_many(chunk_texts)
-    embeddings = process_embed(chunk_texts)
-    print("RESULT === ", embeddings)
-    return embeddings
+    embedding_model = EmbeddingService()
+    embeddings = embedding_model.embed_many(chunk_texts)
 
     if len(chunk_texts) != len(embeddings):
         raise ValueError("Chunks and embeddings count mismatch")
 
     document_service = DocumentService()
-    doc = await document_service.create(session, "SampleDocument", Path(file_path))
+    file = Path(file_path)
+    doc = await document_service.create(session, file.stem, file)
 
     if not doc:
         raise HTTPException(status_code=404, detail="DB not found")

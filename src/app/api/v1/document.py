@@ -21,8 +21,8 @@ def send_message(text: str):
         model=settings.OPENAI_CHAT_MODEL,
         messages=[
             {
-            "role": "user",
-            "content": text
+                "role": "user",
+                "content": text
             }
         ]
     )
@@ -32,7 +32,7 @@ def send_message(text: str):
 
 @router.get("/", response_class=JSONResponse, summary="Upload document", description="Accepts a file path and return file content.")
 async def upload_file(db: AsyncSession = Depends(get_db)):
-    response = await ingest_document(session=db, file_path="src/app/data/documents/sample-document.md")
+    await ingest_document(session=db, file_path="src/app/data/documents/sample-document.md")
     return {
         "message": "Document upload and ingested successfully"
     }
