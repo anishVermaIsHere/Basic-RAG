@@ -9,7 +9,5 @@ router = APIRouter()
 
 
 @router.get("/health")
-async def health_check(
-    db: AsyncSession = Depends(get_db),
-):
+async def health_check(db: AsyncSession = Depends(get_db)):
     return await HealthService.check_app(db)

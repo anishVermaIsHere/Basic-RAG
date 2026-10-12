@@ -19,7 +19,7 @@ async def search_query(req: Request, payload: QueryPayload, db: AsyncSession = D
             "chunk_id": str(chunk.id),
             "document_id": str(chunk.document_id),
             "content": chunk.content,
-            "chunk_index": chunk.chunk_index,
+            "chunk_index": chunk.chunk_index
         }
         for chunk in chunks
     ] 
@@ -28,10 +28,7 @@ async def search_query(req: Request, payload: QueryPayload, db: AsyncSession = D
 
     generator = Generator()
 
-    answer = await generator.generate(
-        question=query,
-        context=context,
-    )
+    answer = await generator.generate(question=query, context=context)
 
     return {
         "answer": answer,
