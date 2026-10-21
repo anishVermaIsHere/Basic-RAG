@@ -1,0 +1,22 @@
+[
+  {
+    "question": "Exactly how many gold coins did the Mayor ultimately hand over to the Piper after the mice were drowned?",
+    "ground_truth": "The document does not state the exact number of coins handed over. It only mentions that the Mayor refused to pay the agreed amount of ten thousand gold coins and offered 'just a tiny fraction instead.'",
+    "evaluation_focus": "Hallucination prevention and negative constraint handling."
+  },
+  {
+    "question": "On what specific calendar date did the mice jump into the River Weser?",
+    "ground_truth": "The text does not specify the exact date the mice jumped into the river. It only notes that this event happened the day after the stranger arrived, and later mentions 'Saint John's Day' as the date the children were taken.",
+    "evaluation_focus": "Temporal reasoning and timeline confusion prevention."
+  },
+  {
+    "question": "Why were exactly two children left behind when the mountain door closed?",
+    "ground_truth": "They were left behind because one child was hard of hearing and the other had hurt her leg, preventing them from keeping up or following the others inside the mountain before it shut.",
+    "evaluation_focus": "Multi-hop retrieval and attribute aggregation."
+  },
+  {
+    "question": "Where did the Piper lead the children to drown them?",
+    "ground_truth": "The Piper did not drown the children. He led the mice and rats to the River Weser to drown them, whereas he led the children inside a large, hollow mountain where they vanished.",
+    "evaluation_focus": "Premise validation and semantic entity matching."
+  }
+]
