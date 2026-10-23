@@ -15,12 +15,12 @@ auth_service = AuthService()
 
 @router.post("/register", status_code=201)
 def register(user: RegisterRequest, res: Response, db: Session = Depends(get_db)):
-    return auth_service.register(data, db)
+    return auth_service.register(user, db)
 
 
 @router.post("/login")
 def login(user: LoginRequest, res: Response, db: Session = Depends(get_db)):
-    auth_res = auth_service.login(data,db)
+    auth_res = auth_service.login(user, db)
     if not auth_res["success"]:
         return res
     if auth_res["access_token"]:
