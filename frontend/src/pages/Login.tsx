@@ -2,20 +2,24 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button, Card, Input } from "../ui";
-import { api } from "../api";
+import { api } from "../services/apis/api";
 import { toast } from "sonner";
+import { API_ENDPOINTS } from "@/services/apis/endpoints";
 
+
+const { AUTH } = API_ENDPOINTS;
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
+
   async function go(e: any) {
     e.preventDefault();
     setLoading(true);
     try {
-      const r = await api.post<any>("/auth/login", { email, password: pw });
+      const r = await api.post<any>(AUTH.login, { email, password: pw });
       localStorage.setItem("rag_token", r.token || "demo");
       nav("/chat");
     } catch {

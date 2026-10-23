@@ -8,7 +8,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { Button, Input, Card, Badge } from "@/ui";
-import { api } from "@/api";
+import { api } from "@/services/apis/api";
 import { bytes, date } from "@/lib";
 import { toast } from "sonner";
 import type { Doc } from "@/types";

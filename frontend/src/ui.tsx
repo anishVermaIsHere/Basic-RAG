@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cn } from "./lib";
 import { Slot } from "@radix-ui/react-slot";
+
 export function Button({
   className,
   variant = "default",
@@ -12,7 +13,7 @@ export function Button({
   return (
     <C
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary/30",
+        "inline-flex items-center justify-center gap-2 rounded-sm text-sm font-medium transition disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary/30",
         variant === "default"
           ? "bg-primary text-primary-foreground hover:bg-primary/90"
           : variant === "outline"
@@ -31,7 +32,7 @@ export const Input = (p: any) => (
   <input
     {...p}
     className={cn(
-      "h-10 w-full rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30",
+      "h-10 w-full rounded-sm border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary/30",
       p.className,
     )}
   />
