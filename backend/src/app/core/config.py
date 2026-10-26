@@ -14,10 +14,16 @@ class Settings:
     OPENROUTER_BASE_URL: str = os.getenv("OPENROUTER_BASE_URL", "")
     OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
 
-    SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-    ALGORITHM = os.getenv("JWT_ALGORITHM","HS256")
-    ACCESS_TOKEN_EXPIRE_HOURS = os.getenv("JWT_ACCESS_TOKEN_LIFETIME_HOURS", 8)
-    REFRESH_TOKEN_EXPIRE_DAYS = os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS", 4)
+    class REDIS:
+        HOST: str = os.getenv("REDIS_HOST", "localhost")
+        PORT: int = os.getenv("REDIS_PORT", 6379)
+        ENABLED: bool = os.getenv("REDIS_ENABLED", "false").lower() == "true"
+
+    class JWT:
+        SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
+        ALGORITHM: str = os.getenv("JWT_ALGORITHM","HS256")
+        ACCESS_TOKEN_EXPIRE_HOURS: int = os.getenv("JWT_ACCESS_TOKEN_LIFETIME_HOURS", 8)
+        REFRESH_TOKEN_EXPIRE_DAYS: int = os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS", 4)
 
 
 

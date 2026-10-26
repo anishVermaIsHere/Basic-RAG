@@ -1,12 +1,21 @@
-from passlib.context import CryptContext
+import bcrypt
+
+# bcrypt only uses the first 72 bytes of the input
+BCRYPT_MAX_BYTES = 72
 
 
 class SecurePassword:
-    def __init__(self):
-        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-    def hash_pwd(self,password: str) -> str:
-        return self.pwd_context.hash(password)
+    def hash_pwd(self, password: str) -> str:
+        secret = password.encode("utf-8")
+        if len(secret) > BCRYPT_MAX_BYTES:
+            raise ValueError(f"Password cannot be longer than {BCRYPT_MAX_BYTES} bytes")
+        return bcrypt.hashpw(secret, bcrypt.gensalt()).decode("utf-8")
 
     def verify_pwd(self, plain_password: str, hashed_password: str) -> bool:
-        return self.pwd_context.verify(plain_password, hashed_password)
+        secret = plain_password.encode("utf-8")
+        if len(secret) > BCRYPT_MAX_BYTES:
+            return False
+        try:
+            return bcrypt.checkpw(secret, hashed_password.encode("utf-8"))
+        except ValueError:  # malformed hash
+            return False

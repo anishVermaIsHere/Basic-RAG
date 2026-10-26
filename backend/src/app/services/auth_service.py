@@ -1,14 +1,16 @@
 
 import json
 
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from uuid import uuid4
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from app.db.models.user import User
+
+from app.db.models import User
 from app.utils.security import SecurePassword
 from app.utils.jwt import JWTService
 from app.utils.redis import Cache
@@ -20,14 +22,16 @@ from app.schemas.users import UserResponse
 
 class AuthService():
     @staticmethod # it rejects self param
-    def register(payload: RegisterRequest, db: Session) -> RegisterResponse:
+    async def register(payload: RegisterRequest, db: AsyncSession) -> RegisterResponse:
         # Check if user already exists
-        user = db.query(User).filter(
-            User.email == payload.email
-        ).first()
+        result = await db.execute(select(User).where(User.email == payload.email))
+        user = result.scalar_one_or_none()
 
         if user:
-            raise Exception("Email already exists")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="User already exist",
+            )
         secure_password = SecurePassword()
 
         # Create new user
@@ -40,8 +44,8 @@ class AuthService():
         )
 
         db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
+        await db.commit()
+        await db.refresh(new_user)
 
         return {
             "id": new_user.id,
@@ -52,24 +56,28 @@ class AuthService():
             "contact": new_user.contact
         }
     
-    def login(self, payload: LoginRequest, db: Session) -> LoginResponse:
+    async def login(self, payload: LoginRequest, db: AsyncSession) -> LoginResponse:
         # Check user
         # Verify password
         # Generate JWT
 
-        user = db.query(User).filter(
-                User.email == payload.email
-            ).first()
-    
+        result = await db.execute(select(User).where(User.email == payload.email))
+        user = result.scalar_one_or_none()
+
         if not user:
-            print("NOT USER")
-            raise Exception("Email does not exist")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User does not exist",
+            )
 
         secure_pwd = SecurePassword()
         is_password_matched = secure_pwd.verify_pwd(payload.password, user.password)
 
         if not is_password_matched:
-            raise Exception("Incorrect password")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials",
+            )
 
         jwt_service = JWTService()
 
@@ -83,7 +91,7 @@ class AuthService():
             "user": UserResponse.model_validate(user)
         }
 
-    async def self(self, req: Request, db: Session, redis: Cache):
+    async def self(self, req: Request, db: AsyncSession, redis: Cache):
         current_user = req.state.user
         user_id = current_user.get('sub')
         user_cache_key = f"user:profile:{user_id}"
@@ -93,11 +101,12 @@ class AuthService():
         if cached_user:
             return { "authenticated": True, "user": json.loads(cached_user) }
 
-        user = db.query(User).filter(User.id == user_id).first()
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
 
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
         user_data = {
             column.name: getattr(user, column.name)
             for column in user.__table__.columns

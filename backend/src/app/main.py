@@ -7,7 +7,7 @@ from app.db.database import init_db, close_db
 from app.api.v1.health import router as health_router
 from app.api.v1.document import router as document_router
 from app.api.v1.query import router as query_router
-
+from app.api.v1.auth import router as auth_router
 
 
 
@@ -42,6 +42,7 @@ def read_root():
 app_router.include_router(health_router)
 app_router.include_router(document_router)
 app_router.include_router(query_router)
+app_router.include_router(auth_router)
 app.include_router(app_router)
 
 
