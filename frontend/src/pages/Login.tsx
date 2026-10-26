@@ -5,13 +5,14 @@ import { Button, Card, Input } from "../ui";
 import { api } from "../services/apis/api";
 import { toast } from "sonner";
 import { API_ENDPOINTS } from "@/services/apis/endpoints";
+import AppConfig from "@/config/config";
 
 
 const { AUTH } = API_ENDPOINTS;
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [pw, setPw] = useState("");
+  const [email, setEmail] = useState(AppConfig.test.email);
+  const [pw, setPw] = useState(AppConfig.test.password);
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
 
@@ -19,13 +20,15 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const r = await api.post<any>(AUTH.login, { email, password: pw });
-      localStorage.setItem("rag_token", r.token || "demo");
-      nav("/chat");
-    } catch {
-      toast.error(
-        "Login failed. If your backend has no auth, set a temporary token or remove Protected in App.tsx",
-      );
+      const res = await api.post<any>(AUTH.login, { email, password: pw });
+      const isSuccess = res?.data?.success;
+      if(isSuccess){
+        nav("/chat");
+      }
+      if(!isSuccess) {
+        toast.error(res?.data?.detail || "Login failed");
+      }
+    } catch (error){
     } finally {
       setLoading(false);
     }

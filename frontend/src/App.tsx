@@ -5,7 +5,7 @@ export default function App() {
   return (
     <>
       <AppRouteProvider />
-      <Toaster position="bottom-right" />
+      <Toaster position="top-center" />
     </>
   );
 }

@@ -1,5 +1,5 @@
-import { useState, useEffect }  from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef }  from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Bot,
   Database,
@@ -11,9 +11,12 @@ import {
   LogOut,
   Sparkles,
   Search,
+  User,
 } from "lucide-react";
 import { Button, Input } from "@/ui";
-
+import AppConfig from "@/config/config"
+import { api } from "@/services/apis/api";
+import { API_ENDPOINTS } from "@/services/apis/endpoints";
 
 const links = [
   ["/chat", "Chat", MessageSquare],
@@ -22,11 +25,42 @@ const links = [
   ["/settings", "Settings", Settings],
 ] as const;
 
-
+const profileLinks = [
+  ["/settings", "My Profile", User],
+  ["/documents", "My Documents", FileText],
+  ["/settings", "Settings", Settings],
+] as const;
 
 export default function AppLayout() {
   const [dark, setDark] = useState(localStorage.getItem("theme") !== "light");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const loc = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenuOpen(false);
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  const logout = async () => {
+    try {
+      await api.post(API_ENDPOINTS.AUTH.logout, {});
+    } finally {
+      localStorage.removeItem("rag_token");
+      setMenuOpen(false);
+      navigate("/", { replace: true });
+    }
+  };
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
@@ -41,7 +75,7 @@ export default function AppLayout() {
             <Sparkles className="size-5" />
           </div>
           <div>
-            <b>RAG Workspace</b>
+            <b>{AppConfig.appName}</b>
             <p className="text-[11px] text-muted-foreground">
               Knowledge assistant
             </p>
@@ -53,10 +87,10 @@ export default function AppLayout() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"}`
+                `flex items-center gap-3 rounded-sm px-3 py-1.5 text-sm ${isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"}`
               }
             >
-              <Icon className="size-5" />
+              <Icon className="size-4" />
               {label}
             </NavLink>
           ))}
@@ -67,7 +101,7 @@ export default function AppLayout() {
               <Bot className="size-4" />
             </div>
             <div>
-              <p className="text-sm font-medium">RAG Assistant</p>
+              <p className="text-sm font-medium">{AppConfig.appName} Assistant</p>
               <p className="text-xs text-muted-foreground">Online</p>
             </div>
           </div>
@@ -89,8 +123,45 @@ export default function AppLayout() {
             <Button variant="ghost" size="icon" onClick={() => setDark(!dark)}>
               {dark ? <Sun /> : <Moon />}
             </Button>
-            <div className="grid size-9 place-items-center rounded-full bg-linear-to-br from-primary to-violet-500 text-xs font-bold text-white">
-              RK
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((o) => !o)}
+                className="grid size-9 place-items-center rounded-full bg-linear-to-br from-primary to-violet-500 text-xs font-bold text-white"
+              >
+                RK
+              </button>
+              {menuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-11 z-30 w-52 rounded-xl border bg-card p-1 shadow-lg curosor-pointer"
+                >
+                  {profileLinks.map(([to, label, Icon]) => (
+                    <NavLink
+                      key={label}
+                      to={to}
+                      role="menuitem"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-3 rounded-sm px-3 py-2 text-sm text-muted-foreground hover:bg-accent"
+                    >
+                      <Icon className="size-4" />
+                      {label}
+                    </NavLink>
+                  ))}
+                  <div className="my-1 border-t" />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={logout}
+                    className="flex w-full items-center gap-3 rounded-sm px-3 py-2 text-sm text-red-500 hover:bg-accent"
+                  >
+                    <LogOut className="size-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>

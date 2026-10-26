@@ -97,7 +97,7 @@ export default function Chat() {
                 </div>
                 <div className="max-w-[85%]">
                   <div
-                    className={`rounded-2xl px-4 py-3 text-sm leading-7 ${m.role === "user" ? "bg-primary text-white" : "border bg-card"}`}
+                    className={`rounded-sm px-3 py-1.5 text-sm leading-7 ${m.role === "user" ? "bg-primary text-white" : "border bg-card"}`}
                   >
                     {m.content}
                   </div>

@@ -4,7 +4,8 @@ export const API_ENDPOINTS = {
         me: "/self"
     },
     AUTH: {
-        login: "/auth/login"
+        login: "/auth/login",
+        logout: "/auth/logout"
     }
 }
 

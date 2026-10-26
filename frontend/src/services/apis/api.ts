@@ -1,5 +1,6 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import appConfig from "@/config/config";
+import { toast } from "sonner";
 
 
 const BASE = `${appConfig.baseUrl}/api/v1`;
@@ -9,26 +10,37 @@ const axiosInstance = axios.create({
   withCredentials: true
 })
 
-async function req<T>(path: string, opt: RequestInit = {}): Promise<T> {
+async function req<T>(path: string, opt: RequestInit = {}): Promise<AxiosResponse | undefined> {
   const headers = new Headers(opt.headers);
 
   if (!(opt.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
 
-  const token = localStorage.getItem("rag_token");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+  try{
+    const r = await axiosInstance({
+      url: path,
+      method: opt.method ?? "GET",
+      headers: Object.fromEntries(headers.entries()),
+      data: opt.body,
+    });
+    // return r.status === 204 ? (undefined as T) : r.data; (Promise<T>)
+    return r;
+  } catch(err){
+    if (axios.isAxiosError(err)) {
+      // console.error("API Error Response:", {
+      //   status: err.response?.status,
+      //   data: err.response?.data, // This contains your FastAPI {"detail": "..."} message
+      //   message: err.message,
+      // });
+      toast.error(err?.response?.data?.detail || err?.message);
+    } else {
+      console.error("Unexpected Error:", err);
+    }
+    
+    // Re-throw the error if you want the component calling `req` to also handle it
+    throw err;
   }
-
-  const r = await axiosInstance.request<T>({
-    url: path,
-    method: opt.method ?? "GET",
-    headers: Object.fromEntries(headers.entries()),
-    data: opt.body,
-  });
-
-  return r.status === 204 ? (undefined as T) : r.data;
 }
 
 export const api = {
