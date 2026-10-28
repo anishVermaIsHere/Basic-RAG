@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button, Card, Input } from "../ui";
-import { api } from "../services/apis";
 import { toast } from "sonner";
 import { authLogin } from "@/services/apis/api";
 import AppConfig from "@/config/config";
@@ -40,7 +39,7 @@ export default function Login() {
           </div>
           <h1 className="mt-4 text-2xl font-semibold">Welcome back</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to your RAG workspace
+            Sign in to your {AppConfig.appName} RAG workspace
           </p>
         </div>
         <form onSubmit={go} className="mt-7 space-y-4">

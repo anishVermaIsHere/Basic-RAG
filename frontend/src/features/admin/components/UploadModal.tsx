@@ -88,6 +88,7 @@ export default function UploadModal({ open, onClose, onUploaded }: Props) {
     if (uploaded) {
       toast.success(`${uploaded} document${uploaded > 1 ? "s" : ""} uploaded`);
       onUploaded();
+      onClose();
     }
   }
 

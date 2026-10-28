@@ -11,6 +11,9 @@ export const API_ENDPOINTS = {
         upload: "/documents/upload/",
         all: "/documents",
         one: (id: string) => `/documents/${id}`
+    },
+    SOURCES: {
+        all: "/sources"
     }
 }
 

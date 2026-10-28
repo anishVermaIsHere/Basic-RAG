@@ -12,10 +12,11 @@ type Props = {
 
 function iconFor(name: string) {
   const ext = name.slice(name.lastIndexOf(".")).toLowerCase();
-  if (ext === ".pdf") return { Icon: FileText, tone: "bg-red-500/10 text-red-600" };
-  if (ext === ".docx") return { Icon: FileType, tone: "bg-blue-500/10 text-blue-600" };
-  if (ext === ".md") return { Icon: FileCode, tone: "bg-purple-500/10 text-purple-600" };
-  return { Icon: FileText, tone: "bg-primary/10 text-primary" };
+  if (ext === ".pdf") return { Icon: FileText, tone: "bg-red-500/10 text-red-600", ext };
+  if (ext === ".docx") return { Icon: FileType, tone: "bg-blue-500/10 text-blue-600", ext };
+  if (ext === ".txt") return { Icon: FileType, tone: "bg-gray-500/10 text-gray-600", ext };
+  if (ext === ".md") return { Icon: FileCode, tone: "bg-purple-500/10 text-purple-600", ext };
+  return { Icon: FileText, tone: "bg-primary/10 text-primary", ext };
 }
 
 const STATUS_TONE: Record<string, string> = {
@@ -29,7 +30,7 @@ export default function DocumentCard({ doc, onRename, onDelete }: Props) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(doc.name);
   const [saving, setSaving] = useState(false);
-  const { Icon, tone } = iconFor(doc.name);
+  const { Icon, tone, ext } = iconFor(doc.name);
 
   function startEdit() {
     setName(doc.name);
@@ -51,7 +52,7 @@ export default function DocumentCard({ doc, onRename, onDelete }: Props) {
   return (
     <Card className="flex items-center gap-4 p-2 rounded-sm">
       <div className={`grid size-11 shrink-0 place-items-center rounded-sm ${tone}`}>
-        <Icon className="size-5" />
+        <Icon className="size-5" /> 
       </div>
 
       <div className="min-w-0 flex-1">
