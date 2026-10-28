@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { FileText, ExternalLink, Search } from "lucide-react";
 import { Card, Input, Badge } from "../ui";
-import { api } from "../services/apis/api";
+import { api } from "../services/apis";
 import type { Source } from "../types";
 
 

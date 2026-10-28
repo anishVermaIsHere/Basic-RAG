@@ -1,48 +1,62 @@
-import { useRef, useState } from "react";
-import {
-  FileText,
-  Plus,
-  RefreshCw,
-  Search,
-  Trash2,
-  UploadCloud,
-} from "lucide-react";
-import { Button, Input, Card, Badge } from "@/ui";
-import { api } from "@/services/apis/api";
-import { bytes, date } from "@/lib";
+import { useEffect, useState } from "react";
+import { Plus, RefreshCw, Search, UploadCloud } from "lucide-react";
+import { Button, Input, Card } from "@/ui";
+import { api } from "@/services/apis";
 import { toast } from "sonner";
 import type { Doc } from "@/types";
+import UploadModal from "./UploadModal";
+import DocumentCard from "./DocumentCard";
+import { API_ENDPOINTS } from "@/services/apis/endpoints";
 
 
 export default function Documents() {
   const [data, setData] = useState<Doc[]>([]);
   const [query, setQuery] = useState("");
-  const input = useRef<HTMLInputElement>(null);
-  const load = () =>
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const load = () => {
     api
-      .get<Doc[]>("/documents")
-      .then(setData)
+      .get<any[]>(API_ENDPOINTS.DOCUMENT.all)
+      .then((r) =>
+        // map the backend shape (filename, file_size, ...) to the Doc type
+        setData(
+          (r?.data ?? []).map((d: any) => ({
+            id: d.id,
+            name: d.filename,
+            type: d.content_type,
+            size: d.file_size,
+            status: d.status === "pending" ? "processing" : d.status,
+            chunks: d.chunks,
+            createdAt: d.created_at,
+          })),
+        ),
+      )
       .catch(() => setData([]));
-  useState(() => {
+  };
+
+  useEffect(() => {
     load();
-  });
-  async function upload(f?: File) {
-    if (!f) return;
-    try {
-      await api.upload("/documents/upload", f);
-      toast.success("Uploaded");
-      load();
-    } catch {
-      toast.error("Upload failed");
-    }
-  }
+  }, []);
+
   async function del(id: string) {
     if (!confirm("Delete this document?")) return;
     try {
-      await api.del(`/documents/${id}`);
+      await api.del(API_ENDPOINTS.DOCUMENT.one(id));
+      toast.success("Document deleted");
       load();
     } catch {
-      toast.error("Delete failed");
+      // api.del already shows an error toast
+    }
+  }
+
+  async function rename(id: string, name: string) {
+    try {
+      await api.patch(API_ENDPOINTS.DOCUMENT.one(id), { filename: name });
+      setData((prev) => prev.map((d) => (d.id === id ? { ...d, name } : d)));
+      toast.success("Document renamed");
+      return true;
+    } catch {
+      return false;
     }
   }
   const rows = data.filter((d) =>
@@ -57,16 +71,9 @@ export default function Documents() {
             Upload and manage the documents used by retrieval.
           </p>
         </div>
-        <input
-          ref={input}
-          type="file"
-          className="hidden"
-          accept=".pdf,.doc,.docx,.txt,.md,.csv"
-          onChange={(e) => upload(e.target.files?.[0])}
-        />
-        <Button onClick={() => input.current?.click()}>
-          <Plus />
-          Add document
+        <Button onClick={() => setModalOpen(true)}>
+          <Plus className="size-4"/>
+          Document
         </Button>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
@@ -88,7 +95,7 @@ export default function Documents() {
         </Card>
       </div>
       <Card>
-        <div className="flex gap-3 border-b p-4">
+        <div className="flex items-center gap-3 border-b p-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
             <Input
@@ -99,28 +106,13 @@ export default function Documents() {
             />
           </div>
           <Button variant="outline" onClick={load}>
-            <RefreshCw />
+            <RefreshCw className="size-4"/>
           </Button>
         </div>
         {rows.length ? (
-          <div className="divide-y">
+          <div className="space-y-3 p-4">
             {rows.map((d) => (
-              <div key={d.id} className="flex items-center gap-4 p-4">
-                <div className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
-                  <FileText />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{d.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {bytes(d.size)} · {d.chunks || 0} chunks ·{" "}
-                    {date(d.createdAt)}
-                  </p>
-                </div>
-                <Badge>{d.status}</Badge>
-                <Button variant="ghost" size="icon" onClick={() => del(d.id)}>
-                  <Trash2 />
-                </Button>
-              </div>
+              <DocumentCard key={d.id} doc={d} onRename={rename} onDelete={del} />
             ))}
           </div>
         ) : (
@@ -133,6 +125,11 @@ export default function Documents() {
           </div>
         )}
       </Card>
+      <UploadModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onUploaded={load}
+      />
     </div>
   );
 }

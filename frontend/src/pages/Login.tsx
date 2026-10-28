@@ -2,13 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button, Card, Input } from "../ui";
-import { api } from "../services/apis/api";
+import { api } from "../services/apis";
 import { toast } from "sonner";
-import { API_ENDPOINTS } from "@/services/apis/endpoints";
+import { authLogin } from "@/services/apis/api";
 import AppConfig from "@/config/config";
 
-
-const { AUTH } = API_ENDPOINTS;
 
 export default function Login() {
   const [email, setEmail] = useState(AppConfig.test.email);
@@ -20,7 +18,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await api.post<any>(AUTH.login, { email, password: pw });
+      const res = await authLogin({ email, password: pw });
       const isSuccess = res?.data?.success;
       if(isSuccess){
         nav("/chat");

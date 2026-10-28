@@ -21,7 +21,7 @@ export function Button({
             : variant === "ghost"
               ? "hover:bg-accent"
               : "bg-secondary",
-        size === "icon" ? "size-10" : size === "sm" ? "h-9 px-3" : "h-10 px-4",
+        size === "icon" ? "size-10" : size === "sm" ? "h-6 px-3" : "h-8 px-4",
         className,
       )}
       {...p}

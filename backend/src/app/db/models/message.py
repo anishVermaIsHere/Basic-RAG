@@ -51,11 +51,10 @@ class Message(Base):
             values_callable=lambda enum_cls: [member.value for member in enum_cls],
         ),
         nullable=False,
-        default=MessageRole.USER,
+        default=MessageRole.USER
     )
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-
     chat: Mapped["Chat"] = relationship("Chat", back_populates="messages")
     sources: Mapped[list["DocChunk"]] = relationship("DocChunk", secondary=message_sources, lazy="selectin")

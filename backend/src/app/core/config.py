@@ -26,5 +26,13 @@ class Settings:
         REFRESH_TOKEN_EXPIRE_DAYS: int = os.getenv("JWT_REFRESH_TOKEN_LIFETIME_DAYS", 4)
 
 
+    class CLOUDINARY: 
+        API_KEY: str = os.getenv("CLOUDINARY_API_KEY")
+        SECRET_KEY: str = os.getenv("CLOUDINARY_API_SEC_KEY")
+        CLOUD_NAME: str = os.getenv("CLOUDINARY_CLOUD_NAME")
+        FOLDER: str = "look-rag/documents"
+    
+
+
 
 settings = Settings()

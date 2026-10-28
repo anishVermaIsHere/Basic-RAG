@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import HTTPException
 from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,7 +10,7 @@ from app.pipeline import load_document, chunk_text
 
 
 
-async def ingest_document(session: AsyncSession, file_path: str):
+async def ingest_document(session: AsyncSession, file_path: str, document_id: uuid.UUID | None = None):
     if not session:
         raise ValueError("session not found")
     
@@ -35,16 +37,19 @@ async def ingest_document(session: AsyncSession, file_path: str):
         raise ValueError("Chunks and embeddings count mismatch")
 
     document_service = DocumentService()
-    file = Path(file_path)
-    doc = await document_service.create(session, file.stem, file)
+    # an existing document (e.g. created by the upload endpoint) is reused instead of inserting a duplicate row
+    if document_id is None:
+        file = Path(file_path)
+        doc = await document_service.create(session, file.stem, file)
 
-    if not doc:
-        raise HTTPException(status_code=404, detail="DB not found")
+        if not doc:
+            raise HTTPException(status_code=404, detail="DB not found")
+        document_id = doc.id
 
     for index, (content, embedding) in enumerate(
         zip(chunk_texts, embeddings)
     ):
-       await document_service.create_chunk(session, doc.id, content, index, embedding)
+       await document_service.create_chunk(session, document_id, content, index, embedding)
 
     return len(chunk_texts)
     

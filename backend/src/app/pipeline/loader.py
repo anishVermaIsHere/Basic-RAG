@@ -5,6 +5,7 @@ from app.utils.document.process_files import ALLOWED_FILE_EXTS, process_file
 
 def load_document(file_path: str) -> str:
     path = Path(file_path)
+
     # BASE_DIR = Path(__file__).resolve().parent
     file_ext = path.suffix.lower()
     if not path.exists():

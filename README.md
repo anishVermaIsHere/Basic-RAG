@@ -20,3 +20,7 @@ A full-stack RAG chat/workspace application built with React and FastAPI.
 - Reranking
 - Prompt Building
 - Answer Generation
+
+## Screens
+
+![](./001.png)

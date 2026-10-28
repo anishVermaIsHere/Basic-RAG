@@ -15,8 +15,9 @@ import {
 } from "lucide-react";
 import { Button, Input } from "@/ui";
 import AppConfig from "@/config/config"
-import { api } from "@/services/apis/api";
+import { api } from "@/services/apis";
 import { API_ENDPOINTS } from "@/services/apis/endpoints";
+import { authLogout } from "@/services/apis/api";
 
 const links = [
   ["/chat", "Chat", MessageSquare],
@@ -54,9 +55,8 @@ export default function AppLayout() {
 
   const logout = async () => {
     try {
-      await api.post(API_ENDPOINTS.AUTH.logout, {});
+      await authLogout();
     } finally {
-      localStorage.removeItem("rag_token");
       setMenuOpen(false);
       navigate("/", { replace: true });
     }

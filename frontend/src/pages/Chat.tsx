@@ -8,7 +8,7 @@ import {
   User,
 } from "lucide-react";
 import { Button, Card, Textarea, Badge } from "../ui";
-import { api } from "../services/apis/api";
+import { api } from "../services/apis";
 import type { Message } from "../types";
 import { toast } from "sonner";
 

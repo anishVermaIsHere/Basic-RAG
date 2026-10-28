@@ -6,6 +6,11 @@ export const API_ENDPOINTS = {
     AUTH: {
         login: "/auth/login",
         logout: "/auth/logout"
+    },
+    DOCUMENT: {
+        upload: "/documents/upload/",
+        all: "/documents",
+        one: (id: string) => `/documents/${id}`
     }
 }
 
