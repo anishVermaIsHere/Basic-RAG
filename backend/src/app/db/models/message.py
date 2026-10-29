@@ -11,7 +11,7 @@ from app.db.database import Base
 
 if TYPE_CHECKING:
     from app.db.models.chat import Chat
-    from app.db.models.document_chunk import DocChunk
+    from app.db.models.document import DocChunk
 
 
 # Use Python Enum for strict type safety

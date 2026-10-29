@@ -1,40 +1,79 @@
 import uuid
 
-from fastapi import APIRouter, Request, Depends, Query
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
-from typing import Annotated
+from fastapi import APIRouter, Request, Depends, HTTPException, Query
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse, StreamingResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.schemas.chat import MessagePayload, ChatUpdate
-from app.services.message_service import create
+from app.schemas.chat import MessagePayload
+from app.services.chat_service import ChatService
+from app.services.message_service import MessageService
+
 
 router = APIRouter(prefix="/chats", tags=["Chat"])
 
+chat_service = ChatService()
+message_service = MessageService()
 
-@router.get("")
-def chat_get():
-    return { "success": True }
+def chat_to_dict(chat):
+    return {"id": str(chat.id), "title": chat.title, "created_at": chat.created_at}
 
-@router.post("", response_class=JSONResponse, summary="Chat with AI", description="Accepts a user message and returns an AI-generated response.")
-def chat_create(req: Request, payload: MessagePayload, db: Session = Depends(get_db)):
-    data = create(payload, db, req)
-    return data
+@router.get("", summary="List or search the current user's chats")
+async def chat_list(req: Request, q: str | None = Query(None), db: AsyncSession = Depends(get_db)):
+    user_id = uuid.UUID(req.state.user["sub"])
+    q = q.strip() if q else None
+    if q:
+        chats = await chat_service.search(q, user_id, db)
+    else:
+        chats = await chat_service.get_by_user_id(user_id, db)
+    return JSONResponse(content=jsonable_encoder([chat_to_dict(c) for c in chats]))
 
-# @router.delete("/{chat_id}", response_class=JSONResponse, summary="Chat delete", description="Accepts chat_id and pass it to controller")
-# def chat_delete(chat_id: uuid.UUID, db: Session = Depends(get_db)):
-#     return delete_chat(chat_id, db)
+@router.get("/{chat_id}", summary="Get a chat with its messages")
+async def chat_detail(chat_id: uuid.UUID, req: Request, db: AsyncSession = Depends(get_db)):
+    user_id = uuid.UUID(req.state.user["sub"])
+    chat = await chat_service.get_by_id(chat_id, db, is_messages=True)
+    if not chat or chat.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    return JSONResponse(content=jsonable_encoder({
+        **chat_to_dict(chat),
+        "messages": [message_service.to_dict(m) for m in chat.messages],
+    }))
 
+@router.post("", summary="Chat with AI", description="Accepts a user message and streams an AI-generated response.")
+async def chat_create(req: Request, payload: MessagePayload, db: AsyncSession = Depends(get_db)):
+    try:
+        is_new_chat = not payload.chat_id
+        user_id = uuid.UUID(req.state.user["sub"])
+        chat = await chat_service.get_or_create_chat(user_id, db, payload)
+        chat_id = chat.id
+        await db.commit()  # persist the chat so it exists before streaming starts
+    except HTTPException:
+        await db.rollback()
+        raise
+    except Exception as error:
+        await db.rollback()
+        print("LLM Error:", error)
+        raise HTTPException(status_code=502, detail="LLM request failed")
 
-# @router.get("/search", response_class=JSONResponse, summary="Chat search", description="Accepts query string and pass it to chat controller to fetch chat based on query")
-# def chat_query(req: Request, query: Annotated[str | None, Query(min_length=3, max_length=50, alias="q")] = None, db: Session = Depends(get_db)):
-#     return search_chat(query, db, req)
+    async def generate_message():
+        try:
+            async for chunk in chat_service.stream_message(user_id, chat_id, db, payload):
+                yield chunk
+        except Exception as stream_err:
+            print("Mid-stream LLM Error:", stream_err)
 
+            if is_new_chat:
+                try:
+                    await db.rollback()  # Discard current session state
+                    await chat_service.delete_by_id(chat_id, db)
+                except Exception as cleanup_err:
+                    print("Failed to cleanup chat:", cleanup_err)
 
-# @router.get("/{chat_id}", response_class=JSONResponse, summary="Chat fetch", description="Accepts chat_id and pass it to controller to fetch chat")
-# def chat_fetch(chat_id: uuid.UUID, db: Session = Depends(get_db)):
-#     return get_chat(chat_id, db)
+            raise
 
-# @router.put("/{chat_id}", response_class=JSONResponse, summary="Chat update", description="Accepts chat_id and pass it to controller to update chat")
-# def chat_update(chat_id: str, payload: ChatUpdate, req: Request = None, db: Session = Depends(get_db)):
-#     return update_chat(chat_id, payload, db)
+    response = StreamingResponse(generate_message(), media_type="text/event-stream")
+    response.headers["x-chat-id"] = str(chat_id)
+    response.headers["Access-Control-Expose-Headers"] = "x-chat-id"
+
+    return response

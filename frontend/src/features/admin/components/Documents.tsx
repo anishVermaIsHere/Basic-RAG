@@ -68,7 +68,7 @@ export default function Documents() {
     <div className="space-y-6 p-4 md:p-7">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-2xl font-semibold">Knowledge base</h2>
+          <h2 className="text-xl font-semibold">Knowledge base</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Upload and manage the documents used by retrieval.
           </p>

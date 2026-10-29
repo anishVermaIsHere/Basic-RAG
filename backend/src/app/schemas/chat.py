@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from app.schemas.message import Sender
-from app.database.models.message import MessageRole
+from app.db.models.message import MessageRole
 
 
 class MessagePayload(BaseModel):

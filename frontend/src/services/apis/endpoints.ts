@@ -7,6 +7,10 @@ export const API_ENDPOINTS = {
         login: "/auth/login",
         logout: "/auth/logout"
     },
+    CHAT: {
+        message: "/chats",
+        one: (id: string) => `/chats/${id}`
+    },
     DOCUMENT: {
         upload: "/documents/upload/",
         all: "/documents",

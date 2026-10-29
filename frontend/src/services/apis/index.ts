@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import appConfig from "@/config/config";
 import { toast } from "sonner";
 
@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
   withCredentials: true
 })
 
-async function req<T>(path: string, opt: RequestInit = {}): Promise<AxiosResponse | undefined> {
+async function req<T>(path: string, opt: RequestInit = {}, config: AxiosRequestConfig = {}): Promise<AxiosResponse | undefined> {
   const headers = new Headers(opt.headers);
 
   if (!(opt.body instanceof FormData)) {
@@ -23,6 +23,7 @@ async function req<T>(path: string, opt: RequestInit = {}): Promise<AxiosRespons
       method: opt.method ?? "GET",
       headers: Object.fromEntries(headers.entries()),
       data: opt.body,
+      ...config,
     });
     // return r.status === 204 ? (undefined as T) : r.data; (Promise<T>)
     return r;
@@ -44,12 +45,12 @@ async function req<T>(path: string, opt: RequestInit = {}): Promise<AxiosRespons
 }
 
 export const api = {
-  get: <T>(p: string) => req<T>(p),
-  post: <T>(p: string, b: any) =>
+  get: <T>(p: string, config?: AxiosRequestConfig) => req<T>(p, {}, config),
+  post: <T>(p: string, b: any, config?: AxiosRequestConfig) =>
     req<T>(p, {
       method: "POST",
       body: b instanceof FormData ? b : JSON.stringify(b),
-    }),
+    }, config),
   patch: <T>(p: string, b: any) =>
     req<T>(p, { method: "PATCH", body: JSON.stringify(b) }),
   del: <T>(p: string) => req<T>(p, { method: "DELETE" }),

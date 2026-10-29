@@ -24,3 +24,4 @@ A full-stack RAG chat/workspace application built with React and FastAPI.
 ## Screens
 
 ![](./001.png)
+![](./002.png)

@@ -8,6 +8,8 @@ from app.api.v1.health import router as health_router
 from app.api.v1.document import router as document_router
 from app.api.v1.query import router as query_router
 from app.api.v1.auth import router as auth_router
+from app.api.v1.chat import router as chat_router
+from app.utils.auth_middleware import AuthMiddleware
 
 
 
@@ -25,6 +27,7 @@ async def lifespan(app: FastAPI):
 configure_mappers()
 
 app = FastAPI(title="Basic RAG App", lifespan=lifespan)
+app.add_middleware(AuthMiddleware)  # added before CORS so CORS wraps its 401s
 app.add_middleware(
     CORSMiddleware,
     allow_origins = ["http://localhost:5173", "http://localhost:3000"],
@@ -43,6 +46,7 @@ app_router.include_router(health_router)
 app_router.include_router(document_router)
 app_router.include_router(query_router)
 app_router.include_router(auth_router)
+app_router.include_router(chat_router)
 app.include_router(app_router)
 
 

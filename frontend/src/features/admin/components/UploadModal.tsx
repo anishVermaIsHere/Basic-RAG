@@ -4,13 +4,9 @@ import { toast } from "sonner";
 import { Button, Spinner } from "@/ui";
 import { uploadFile } from "../apis/document";
 import { bytes } from "@/lib";
+import { ALLOWED_EXTS, MAX_FILE_SIZE } from "@/utils/constant";
+import { Status, Item } from "@/types";
 
-// keep in sync with the backend (ALLOWED_FILE_EXTS / MAX_FILE_SIZE)
-const ALLOWED_EXTS = [".pdf", ".docx", ".txt", ".md"];
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-type Status = "pending" | "uploading" | "done" | "error";
-type Item = { id: string; file: File; status: Status };
 
 type Props = {
   open: boolean;
