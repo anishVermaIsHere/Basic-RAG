@@ -192,7 +192,7 @@ export default function ChatPanel() {
                 </div>
                 <div className="max-w-[85%]">
                   <div
-                    className={`rounded-sm px-2.5 py-1 text-sm leading-7 ${m.role === "user" ? "bg-gray-200" : "border bg-card"}`}
+                    className={`rounded-sm px-2.5 py-1 text-sm leading-7 ${m.role === "user" ? "bg-gray-200 dark:text-background" : "border bg-card"}`}
                   >
                     <MarkdownRenderer key={m.id} keyIndex={m.id} content={m.content}/>
                   </div>
@@ -226,7 +226,7 @@ export default function ChatPanel() {
                 <div className="grid size-9 place-items-center rounded-xl bg-primary text-white">
                   <Bot />
                 </div>
-                <div className="rounded-sm border bg-card px-4 py-3 text-sm text-muted-foreground">
+                <div className="rounded-sm border bg-card px-2.5 py-1 text-sm text-muted-foreground">
                   Retrieving your request...
                 </div>
               </div>

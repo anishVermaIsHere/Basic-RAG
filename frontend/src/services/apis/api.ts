@@ -2,7 +2,7 @@ import { API_ENDPOINTS } from "@/services/apis/endpoints";
 import { api } from "@/services/apis";
 
 
-const { CHAT, AUTH } = API_ENDPOINTS;
+const { CHAT, AUTH, SOURCES } = API_ENDPOINTS;
 
 export async function authLogin(credentials: any){
    return await api.post<any>(AUTH.login, credentials);
@@ -23,6 +23,16 @@ export async function getChats(q?: string) {
 export async function getChat(id: string) {
   const res = await api.get<any>(CHAT.one(id));
   return res?.data;
+}
+
+export async function getSources(params: { q?: string; document_id?: string; limit?: number; offset?: number }) {
+  const res = await api.get<any[]>(SOURCES.all, { params });
+  return res?.data ?? [];
+}
+
+export async function getSourceStats() {
+  const res = await api.get<any[]>(SOURCES.stats);
+  return res?.data ?? [];
 }
 
 export async function streamMessage(

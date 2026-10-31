@@ -9,6 +9,7 @@ from app.api.v1.document import router as document_router
 from app.api.v1.query import router as query_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.chat import router as chat_router
+from app.api.v1.sources import router as sources_router
 from app.utils.auth_middleware import AuthMiddleware
 
 
@@ -47,6 +48,7 @@ app_router.include_router(document_router)
 app_router.include_router(query_router)
 app_router.include_router(auth_router)
 app_router.include_router(chat_router)
+app_router.include_router(sources_router)
 app.include_router(app_router)
 
 

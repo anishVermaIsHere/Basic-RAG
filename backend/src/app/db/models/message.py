@@ -3,7 +3,7 @@ import enum
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Index, Table, Text, func, text
+from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Index, Table, Text, func, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -28,6 +28,7 @@ message_sources = Table(
     Base.metadata,
     Column("message_id", UUID(as_uuid=True), ForeignKey("messages.id", ondelete="CASCADE"), primary_key=True),
     Column("chunk_id", UUID(as_uuid=True), ForeignKey("document_chunks.id", ondelete="CASCADE"), primary_key=True),
+    Column("score", Float, nullable=True),  # retrieval similarity (1 = identical)
 )
 
 

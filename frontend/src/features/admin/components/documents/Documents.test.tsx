@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 
 import Documents from "./Documents";
-import { deleteDocument, fetchDocuments, uploadFile } from "../apis/document";
+import { deleteDocument, fetchDocuments, uploadFile } from "../../apis/document";
 
 vi.mock("../apis/document", () => ({
   fetchDocuments: vi.fn(),

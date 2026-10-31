@@ -5,10 +5,10 @@ import { Button, Input, Card } from "@/ui";
 import { api } from "@/services/apis";
 import { toast } from "sonner";
 import type { Doc } from "@/types";
-import UploadModal from "./UploadModal";
+import UploadModal from "../UploadModal";
 import DocumentCard from "./DocumentCard";
 import { API_ENDPOINTS } from "@/services/apis/endpoints";
-import { fetchDocuments, deleteDocument, renameDocumentName } from "../apis/document";
+import { fetchDocuments, deleteDocument, renameDocumentName } from "../../apis/document";
 
 
 export default function Documents() {
@@ -68,7 +68,7 @@ export default function Documents() {
     <div className="space-y-6 p-4 md:p-7">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h2 className="text-xl font-semibold">Knowledge base</h2>
+          <h2 className="text-xl font-semibold">Manage Documents</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Upload and manage the documents used by retrieval.
           </p>

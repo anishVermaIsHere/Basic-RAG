@@ -32,7 +32,11 @@ async def vector_search(db: AsyncSession, query: str, top_k: int = 10):
     )
     result = await db.execute(stmt)
 
-    return result.scalars().all()
+    chunks = []
+    for chunk, dist in result.all():
+        chunk.score = 1 - float(dist)  # transient attribute, not a column
+        chunks.append(chunk)
+    return chunks
 
 
 # Parse retrieval

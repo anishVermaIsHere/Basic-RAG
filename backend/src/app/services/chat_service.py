@@ -4,10 +4,12 @@ from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select
+from sqlalchemy import select, insert
 
 from app.db.models.chat import Chat
-from app.db.models.message import MessageRole
+from app.db.models.message import MessageRole, message_sources
+from app.pipeline import hybrid_retrieve, context_build
+from app.prompts.registry.loader import load_prompt
 from app.schemas.chat import MessagePayload, ChatUpdate
 from app.services.assistant_service import AssistantService
 from app.services.message_service import MessageService
@@ -39,10 +41,27 @@ class ChatService:
 
         answer = ""
 
+        # Retrieve relevant chunks; if retrieval fails, fall back to a plain LLM answer
+        chunks = []
+        try:
+            chunks = await hybrid_retrieve(db, payload.content)
+        except Exception as retrieval_err:
+            print("Retrieval Error:", retrieval_err)
+            await db.rollback()
+
+        user_content = payload.content
+        if chunks:
+            context = context_build([
+                {"chunk_index": c.chunk_index, "content": c.content} for c in chunks
+            ])
+            user_content = load_prompt("answer_generation").format(
+                context=context, question=payload.content
+            )
+
         messages = [
             {
                 "role": "user",
-                "content": payload.content
+                "content": user_content
             }
         ]
 
@@ -60,13 +79,27 @@ class ChatService:
             "location": None
         }
 
-        await message_service.create(
+        assistant_message = await message_service.create(
             db=db,
             chat_id=chat_id,
             sender=assistant_sender,
             content=answer,
             role=MessageRole.ASSISTANT.value
         )
+
+        # Record which chunks were cited (with similarity score) for the Sources page
+        if chunks:
+            await db.execute(
+                insert(message_sources),
+                [
+                    {
+                        "message_id": assistant_message.id,
+                        "chunk_id": c.id,
+                        "score": getattr(c, "score", None),
+                    }
+                    for c in chunks
+                ],
+            )
 
         await db.commit()
 

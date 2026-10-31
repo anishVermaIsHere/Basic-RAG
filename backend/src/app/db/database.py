@@ -16,6 +16,13 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
         await conn.run_sync(Base.metadata.create_all)
+        # create_all doesn't alter existing tables
+        await conn.execute(text("ALTER TABLE message_sources ADD COLUMN IF NOT EXISTS score DOUBLE PRECISION;"))
+        await conn.execute(text("ALTER TABLE documents ADD COLUMN IF NOT EXISTS source_url TEXT;"))
+        await conn.execute(text("ALTER TABLE documents ADD COLUMN IF NOT EXISTS source_type VARCHAR(50) NOT NULL DEFAULT 'file';"))
+        await conn.execute(text("ALTER TABLE documents ALTER COLUMN file_size TYPE BIGINT;"))
+        await conn.execute(text("ALTER TABLE document_chunks ADD COLUMN IF NOT EXISTS page_number INTEGER;"))
+        await conn.execute(text("ALTER TABLE chats ADD COLUMN IF NOT EXISTS assistant_id UUID REFERENCES assistants(id) ON DELETE SET NULL;"))
     
 async def close_db():
     """Cleans up database connection pools on shutdown."""

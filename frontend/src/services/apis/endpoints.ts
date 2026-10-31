@@ -17,7 +17,8 @@ export const API_ENDPOINTS = {
         one: (id: string) => `/documents/${id}`
     },
     SOURCES: {
-        all: "/sources"
+        all: "/sources",
+        stats: "/sources/stats"
     }
 }
 
