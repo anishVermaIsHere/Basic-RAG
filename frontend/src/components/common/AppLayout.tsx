@@ -22,7 +22,8 @@ import { authLogout } from "@/services/apis/api";
 const links = [
   ["/chat", "Chat", MessageSquare],
   ["/documents", "Documents", FileText],
-  ["/sources", "Sources", Database],
+  ["knowledgebase", "Knowledge Base", FileText],
+  // ["/sources", "Sources", Database],
   ["/settings", "Settings", Settings],
 ] as const;
 
@@ -87,7 +88,7 @@ export default function AppLayout() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-sm px-3 py-1.5 text-sm ${isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent"}`
+                `flex items-center gap-3 rounded-sm px-3 py-1.5 text-sm ${isActive ? "bg-primary text-muted" : "text-muted-foreground hover:bg-accent"}`
               }
             >
               <Icon className="size-4" />

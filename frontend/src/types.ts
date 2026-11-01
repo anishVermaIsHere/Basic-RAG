@@ -1,4 +1,6 @@
 export type Source={id:string;title:string;snippet?:string;content?:string;page?:number;score?:number|null;url?:string;chunk_index?:number;document_id?:string;chat_id?:string;chat_title?:string;message_id?:string;created_at?:string};
+export type StreamSource={document_id:string;filename:string|null;storage_path:string|null;chunk_index:number;page:number|null;score:number|null};
+export type StreamEvent={type:"content"|"sources"|"done"|"error";content?:string;page?:number[]|"";sources?:StreamSource[]|"";message?:string};
 export type SourceStat={document_id:string;title:string;citations:number};
 export type Message={id:string;role:"user"|"assistant";content:string;createdAt:string;sources?:Source[]};
 export type ChatSummary={id:string;title:string;created_at:string};

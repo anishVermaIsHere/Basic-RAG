@@ -1,5 +1,6 @@
 import { API_ENDPOINTS } from "@/services/apis/endpoints";
 import { api } from "@/services/apis";
+import type { StreamEvent } from "@/types";
 
 
 const { CHAT, AUTH, SOURCES } = API_ENDPOINTS;
@@ -25,6 +26,10 @@ export async function getChat(id: string) {
   return res?.data;
 }
 
+export async function deleteChat(id: string) {
+  return await api.delete(CHAT.one(id));
+}
+
 export async function getSources(params: { q?: string; document_id?: string; limit?: number; offset?: number }) {
   const res = await api.get<any[]>(SOURCES.all, { params });
   return res?.data ?? [];
@@ -37,7 +42,7 @@ export async function getSourceStats() {
 
 export async function streamMessage(
   payload: { chatId?: string | null; content: string; sender: any },
-  onChunk: (text: string) => void,
+  onEvent: (event: StreamEvent) => void,
   signal?: AbortSignal,
 ): Promise<{ chatId: string | null }> {
   // axios needs the fetch adapter to expose the response body as a stream in the browser
@@ -53,12 +58,24 @@ export async function streamMessage(
 
   const reader = (res?.data as ReadableStream<Uint8Array>).getReader();
   const decoder = new TextDecoder();
+  let buffer = "";
+  const flush = (frame: string) => {
+    const line = frame.split("\n").find((l) => l.startsWith("data:"));
+    if (!line) return;
+    const event = JSON.parse(line.slice(5).trim()) as StreamEvent;
+    if (event.type === "error") throw new Error(event.message || "Stream failed");
+    onEvent(event);
+  };
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
-    const text = decoder.decode(value, { stream: true });
-    if (text) onChunk(text);
+    buffer += decoder.decode(value, { stream: true });
+    // SSE frames are separated by a blank line; a frame may span multiple reads
+    const frames = buffer.split("\n\n");
+    buffer = frames.pop() ?? "";
+    frames.forEach(flush);
   }
+  if (buffer.trim()) flush(buffer);
 
   return { chatId: res?.headers["x-chat-id"] ?? null };
 }

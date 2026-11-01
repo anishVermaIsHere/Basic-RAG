@@ -12,11 +12,15 @@ import {
   SlidersHorizontal,
   User,
 } from "lucide-react";
+import BrandLogo from "./common/AIAsstAvatar";
 import { Button, Card, Input, Textarea } from "../ui";
 import { getChat, getChats, streamMessage } from "@/services/apis/api";
 import type { ChatSummary, Message } from "../types";
 import { toast } from "sonner";
 import MarkdownRenderer from "./common/MarkdownRender";
+import { NavLink } from "react-router-dom";
+import ChatList from "./ChatList";
+import { queryClient } from "@/lib/query";
 
 
 const SUGGESTED_PROMPTS = [
@@ -33,7 +37,7 @@ export default function ChatPanel() {
   const [search, setSearch] = useState("");
   const [loadingChats, setLoadingChats] = useState(false);
   const { data } = useQuery({ queryKey: ["chats", search], queryFn: async() => await getChats(search.trim()) });
- const chats = data?.data || [];
+  const chats = data?.data || [];
   const bottom = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const defaultErrorMessage = "Oh no! It seems I'm unable to generate a response right now.\n Please try again or feel free to reach out to our customer support for assistance.";
@@ -97,11 +101,36 @@ export default function ChatPanel() {
     let started = false;
     const controller = new AbortController();
     abortRef.current = controller;
+    return
     try {
       const { chatId: newId } = await streamMessage(
         // TODO: replace sender id with the logged-in user's id
         { chatId, content: q, sender: { id: "user", location: {} } },
-        (chunk) => {
+        (event) => {
+          if (event.type === "sources") {
+            const sources = Array.isArray(event.sources) ? event.sources : [];
+            setMsg((m) =>
+              m.map((x) =>
+                x.id === assistantId
+                  ? {
+                      ...x,
+                      sources: sources.map((s) => ({
+                        id: `${s.document_id}-${s.chunk_index}`,
+                        title: s.filename ?? (s.page != null ? `Page ${s.page}` : `Chunk ${s.chunk_index}`),
+                        snippet: s.storage_path ?? undefined,
+                        page: s.page ?? undefined,
+                        score: s.score,
+                        chunk_index: s.chunk_index,
+                        document_id: s.document_id,
+                      })),
+                    }
+                  : x,
+              ),
+            );
+            return;
+          }
+          if (event.type !== "content") return;
+          const piece = event.content ?? "";
           if (!started) {
             started = true;
             setMsg((m) => [
@@ -109,17 +138,18 @@ export default function ChatPanel() {
               {
                 id: assistantId,
                 role: "assistant",
-                content: chunk,
+                content: piece,
                 createdAt: new Date().toISOString(),
               },
             ]);
           } else {
             setMsg((m) =>
               m.map((x) =>
-                x.id === assistantId ? { ...x, content: x.content + chunk } : x,
+                x.id === assistantId ? { ...x, content: x.content + piece } : x,
               ),
             );
           }
+          queryClient.invalidateQueries({ queryKey: ["chats"]})
         },
         controller.signal,
       );
@@ -186,9 +216,9 @@ export default function ChatPanel() {
                 className={`flex gap-3 ${m.role === "user" ? "flex-row-reverse" : ""}`}
               >
                 <div
-                  className={`grid size-8 shrink-0 place-items-center rounded-xl ${m.role === "user" ? "bg-gray-600 text-background" : "bg-primary text-white"}`}
+                  className={`grid size-8 shrink-0 place-items-center rounded-full ${m.role === "user" ? "bg-gray-600 text-background" : "bg-primary/10 text-white"}`}
                 >
-                  {m.role === "user" ? <User className="size-4"/> : <Bot className="size-4" />}
+                  {m.role === "user" ? <User className="size-4"/> : <BrandLogo />}
                 </div>
                 <div className="max-w-[85%]">
                   <div
@@ -196,37 +226,39 @@ export default function ChatPanel() {
                   >
                     <MarkdownRenderer key={m.id} keyIndex={m.id} content={m.content}/>
                   </div>
+                  {m.sources?.length ? <>
+                  <hr className="my-2"/>
+                  <p className="text-xs italic">Sources:</p> 
+                  </>
+                  : ''}
                   {m.sources?.length ? (
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-3 flex items-center flex-wrap gap-2">
                       {m.sources.map((s) => (
-                        <Card key={s.id} className="p-3">
-                          <div className="flex gap-2">
-                            <FileText className="size-4 text-primary" />
+                        <Card key={s.id} className="p-2 rounded-sm">
+                          <div className="flex items-center gap-2">
+                            <FileText className="size-3 text-primary" />
                             <div>
-                              <b className="text-xs">{s.title}</b>
-                              <p className="text-xs text-muted-foreground">
+                              {/* <b className="text-[10px]">{s.title}</b> */}
+                              <NavLink className={"text-[10px]"} to={s.snippet ?? '/'}>{s.title}</NavLink>
+                              {/* <p className="text-xs text-muted-foreground">
                                 {s.snippet}
-                              </p>
+                              </p> */}
                             </div>
                           </div>
                         </Card>
                       ))}
                     </div>
                   ) : null}
-                  {m.role === "assistant" && (
-                    <Button variant="ghost" size="icon">
-                      <Copy className="size-3.5" />
-                    </Button>
-                  )}
+                  
                 </div>
               </div>
             ))}
             {busy && msg[msg.length - 1]?.role === "user" && (
               <div className="flex gap-3">
-                <div className="grid size-9 place-items-center rounded-xl bg-primary text-white">
-                  <Bot />
+                <div className="grid size-9 place-items-center rounded-full bg-primary/10 text-white">
+                 <BrandLogo />
                 </div>
-                <div className="rounded-sm border bg-card px-2.5 py-1 text-sm text-muted-foreground">
+                <div className="rounded-sm border bg-card px-2.5 py-1 text-sm text-muted-foreground leading-7">
                   Retrieving your request...
                 </div>
               </div>
@@ -275,23 +307,7 @@ export default function ChatPanel() {
             className="pl-8"
           />
         </div>
-        <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
-          {chats?.map((c) => (
-            <button
-              key={c.id}
-              onClick={() => openChat(c.id)}
-              className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm hover:bg-muted ${c.id === chatId ? "bg-muted font-medium" : ""}`}
-            >
-              <MessageSquare className="size-3.5 shrink-0" />
-              <span className="truncate">{c.title}</span>
-            </button>
-          ))}
-          {!chats.length && !loadingChats && (
-            <p className="px-2 text-xs text-muted-foreground">
-              {search.trim() ? "No chats match your search." : "No chats yet."}
-            </p>
-          )}
-        </div>
+        <ChatList chatId={chatId} chats={chats} openChat={openChat} loadingChats={loadingChats} searchKeyword={search}/>
         <div className="mt-6 flex items-center gap-2">
           <SlidersHorizontal className="size-4" />
           <b>Retrieval controls</b>

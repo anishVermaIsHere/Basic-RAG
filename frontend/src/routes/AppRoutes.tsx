@@ -1,4 +1,4 @@
-import LazyLoader, { ChatPage, DocumentsPage, SourcesPage, SettingsPage, LoginPage } from "@/components/common/LazyLoad"
+import LazyLoader, { ChatPage, DocumentsPage, SettingsPage, LoginPage, KnowledgeBasePage } from "@/components/common/LazyLoad"
 import AppLayout from "@/components/common/AppLayout";
 
 
@@ -15,8 +15,8 @@ const appRoutes = [
             element: <DocumentsPage />,
           },
            {
-            path: '/sources',
-            element: <SourcesPage />,
+            path: '/knowledgebase',
+            element: <KnowledgeBasePage />,
           },
            {
             path: '/settings',

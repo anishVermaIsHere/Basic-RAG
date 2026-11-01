@@ -1,4 +1,5 @@
 import uuid
+import json
 
 from fastapi import APIRouter, Request, Depends, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
@@ -59,9 +60,19 @@ async def chat_create(req: Request, payload: MessagePayload, db: AsyncSession = 
     async def generate_message():
         try:
             async for chunk in chat_service.stream_message(user_id, chat_id, db, payload):
-                yield chunk
+                yield f"data: {json.dumps(chunk)}\n\n"
+
+            # Completion
+            yield f"""data: {json.dumps({
+                'type': 'done'
+            })}\n\n"""
         except Exception as stream_err:
             print("Mid-stream LLM Error:", stream_err)
+
+            yield f"""data: {json.dumps({
+                'type': 'error',
+                'message': 'Failed to generate response'
+            })}\n\n"""
 
             if is_new_chat:
                 try:
@@ -77,3 +88,10 @@ async def chat_create(req: Request, payload: MessagePayload, db: AsyncSession = 
     response.headers["Access-Control-Expose-Headers"] = "x-chat-id"
 
     return response
+
+
+@router.delete("/{chat_id}", response_class=JSONResponse, summary="Chat delete", description="Accepts chat_id and pass it to controller")
+async def chat_delete(chat_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    response = await chat_service.delete_by_id(chat_id, db)
+    return JSONResponse(content=response)
+

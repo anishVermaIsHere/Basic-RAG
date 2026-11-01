@@ -15,7 +15,7 @@ const LazyLoader = () => {
 const LoginPage = lazy(() => import("@/pages/Login"));
 const DocumentsPage = lazy(() => import("@/pages/Documents"));
 const ChatPage = lazy(() => import("@/pages/Chat"));
-const SourcesPage = lazy(() => import("@/pages/Sources"));
+const KnowledgeBasePage = lazy(() => import("@/pages/KnowledgeBase"));
 const SettingsPage = lazy(() => import("@/pages/Settings"));
 
 
@@ -23,7 +23,7 @@ export {
   LoginPage,
   DocumentsPage,
   ChatPage,
-  SourcesPage,
+  KnowledgeBasePage,
   SettingsPage
 }
 

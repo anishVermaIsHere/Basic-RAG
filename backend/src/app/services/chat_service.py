@@ -4,9 +4,9 @@ from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, func
 
-from app.db.models.chat import Chat
+from app.db.models import Chat, Document, DocChunk
 from app.db.models.message import MessageRole, message_sources
 from app.pipeline import hybrid_retrieve, context_build
 from app.prompts.registry.loader import load_prompt
@@ -49,14 +49,14 @@ class ChatService:
             print("Retrieval Error:", retrieval_err)
             await db.rollback()
 
-        user_content = payload.content
+        # user_content = payload.content # temporary off
+        user_content = load_prompt("answer_generation").format(context="", question=payload.content)
+
         if chunks:
             context = context_build([
                 {"chunk_index": c.chunk_index, "content": c.content} for c in chunks
             ])
-            user_content = load_prompt("answer_generation").format(
-                context=context, question=payload.content
-            )
+            user_content = load_prompt("answer_generation").format(context=context, question=payload.content)
 
         messages = [
             {
@@ -69,7 +69,28 @@ class ChatService:
         async for chunk in iterate_in_threadpool(ai_service.stream(messages)):
             answer += chunk
 
-            yield chunk
+            yield {"type": "content", "content": chunk, "page": "", "sources": ""}
+
+        # Send the cited sources once the answer is complete
+        if chunks:
+            doc_rows = await db.execute(
+                select(Document.id, Document.filename, Document.storage_path)
+                .where(Document.id.in_({c.document_id for c in chunks}))
+            )
+            docs = {row.id: row for row in doc_rows}
+            sources = [
+                {
+                    "document_id": str(c.document_id),
+                    "filename": docs[c.document_id].filename if c.document_id in docs else None,
+                    "storage_path": docs[c.document_id].storage_path if c.document_id in docs else None,
+                    "chunk_index": c.chunk_index,
+                    "page": c.page_number,
+                    "score": getattr(c, "score", None),
+                }
+                for c in chunks
+            ]
+            pages = sorted({c.page_number for c in chunks if c.page_number is not None})
+            yield {"type": "sources", "content": "", "page": pages, "sources": sources}
 
         # Save complete assistant response
         assistant = await assistant_service.get_by_name(db, "Look AI")

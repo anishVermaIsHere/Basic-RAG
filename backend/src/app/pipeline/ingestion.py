@@ -46,10 +46,8 @@ async def ingest_document(session: AsyncSession, file_path: str, document_id: uu
             raise HTTPException(status_code=404, detail="DB not found")
         document_id = doc.id
 
-    for index, (content, embedding) in enumerate(
-        zip(chunk_texts, embeddings)
-    ):
-       await document_service.create_chunk(session, document_id, content, index, embedding)
+    for index, (chunk, embedding) in enumerate(zip(all_chunks, embeddings)):
+       await document_service.create_chunk(session, document_id, chunk, index, embedding)
 
     return len(chunk_texts)
     

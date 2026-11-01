@@ -123,15 +123,16 @@ class DocumentService:
 
       return document
 
-   async def create_chunk(self, db: AsyncSession, document_id: uuid.UUID, content: str, chunk_index: int, embedding: list[float]):
+   async def create_chunk(self, db: AsyncSession, document_id: uuid.UUID, chunk: any, chunk_index: int, embedding: list[float]):
       if not document_id:
          raise HTTPException(status_code=404, detail="document_id not found")
 
       doc_chunk = DocChunk(
          document_id=document_id,
-         content=content,
+         content=chunk["content"],
+         page_number=chunk["page"],
          chunk_index=chunk_index,
-         embedding=embedding,
+         embedding=embedding
       )
       db.add(doc_chunk)
       await db.commit()

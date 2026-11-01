@@ -53,7 +53,7 @@ export const api = {
     }, config),
   patch: <T>(p: string, b: any) =>
     req<T>(p, { method: "PATCH", body: JSON.stringify(b) }),
-  del: <T>(p: string) => req<T>(p, { method: "DELETE" }),
+  delete: <T>(p: string) => req<T>(p, { method: "DELETE" }),
   upload: <T>(p: string, f: File) => {
     const b = new FormData();
     b.append("file", f);

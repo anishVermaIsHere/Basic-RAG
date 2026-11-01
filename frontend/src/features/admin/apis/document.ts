@@ -12,7 +12,7 @@ export async function fetchDocuments(){
 }
 
 export async function deleteDocument(documentId: string){
-    return await api.del(DOCUMENT.one(documentId));
+    return await api.delete(DOCUMENT.one(documentId));
 }
 
 export async function renameDocumentName(documentId: string, filename: any){

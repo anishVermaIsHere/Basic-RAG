@@ -12,8 +12,9 @@ class Generator:
 
 
     async def generate(self, question: str, context: str) -> str:
+        print("LD", self.prompt_template)
         prompt = self.prompt_template.format(context=context, question=question)
-
+        print("BEFORE", prompt)
         response = await self.client.responses.create(
             model=settings.OPENAI_CHAT_MODEL,
             input=prompt,
