@@ -101,7 +101,7 @@ export default function ChatPanel() {
     let started = false;
     const controller = new AbortController();
     abortRef.current = controller;
-    return
+
     try {
       const { chatId: newId } = await streamMessage(
         // TODO: replace sender id with the logged-in user's id
