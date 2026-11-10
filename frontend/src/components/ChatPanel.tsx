@@ -76,8 +76,8 @@ export default function ChatPanel() {
 
   useEffect(
     () => { 
-        bottom.current?.scrollIntoView({ behavior: "smooth" });
-        return ()=> {} 
+      bottom.current?.scrollIntoView({ behavior: "smooth" });
+      return ()=> {} 
     },
     [msg, busy],
   );

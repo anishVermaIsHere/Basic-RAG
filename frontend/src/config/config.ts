@@ -1,5 +1,5 @@
 
-import asstAvatar from "@/assets/ai_avatar.png";
+import asstAvatar from "@/assets/look_ai_logo.png";
 
 const appConfig = {
     appName: "Look AI",
