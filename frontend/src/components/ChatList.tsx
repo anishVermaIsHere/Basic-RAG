@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MessageSquareText, Trash } from "lucide-react";
 import { deleteChat } from "@/services/apis/api";
 
+
 type ChatListProps = {
     chatId: string | null, 
     chats: any[],
@@ -14,8 +15,9 @@ export default function ChatList({ chatId, chats, openChat, loadingChats, search
     const queryClient = useQueryClient();
 
     async function removeChat(chatId: string){
-        await deleteChat(chatId);
-        await queryClient.invalidateQueries({ queryKey: ["chats"] });
+      await deleteChat(chatId);
+      await queryClient.invalidateQueries({ queryKey: ["chats"] });
+      openChat("");
     }
     return (
     <div className="mt-3 max-h-64 space-y-1 overflow-y-auto">
@@ -23,16 +25,16 @@ export default function ChatList({ chatId, chats, openChat, loadingChats, search
             <>
             <div
               key={c.id}
-              className={`relative flex group justify-between w-full items-center gap-2 border border-gray-400 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-muted ${c.id === chatId ? "bg-primary text-muted font-medium" : ""}`}
+              className={`relative flex group justify-between w-full items-center gap-2 border border-gray-400 rounded-sm px-2 py-1.5 text-left text-sm ${c.id === chatId ? "bg-primary text-muted font-medium" : "hover:bg-muted"}`}
             >
-                <div className="flex items-center gap-2 cursor-pointer w-full" onClick={() => openChat(c.id)}>
-                    <MessageSquareText  className="size-3.5 shrink-0" />
-                    <span className="w-[80%] truncate">{c.title}</span>
+                <div className="flex items-center gap-2 cursor-pointer w-full group-hover:flex" onClick={() => openChat(c.id)}>
+                  <MessageSquareText  className="size-3.5 shrink-0" />
+                  <span className="w-[80%] truncate">{c.title}</span>
                 </div>
                 <button 
                  onClick={()=>removeChat(c?.id)} 
                  className="absolute z-2 right-2 hidden items-center gap-2 group-hover:flex">
-                    <Trash className="size-3.5 shrink-0"/>
+                  <Trash className="size-3.5 shrink-0"/>
                 </button>
             </div>
             </>
@@ -42,6 +44,6 @@ export default function ChatList({ chatId, chats, openChat, loadingChats, search
               {searchKeyword.trim() ? "No chats match your search." : "No chats yet."}
             </p>
           )}
-        </div>
+      </div>
     )
 }

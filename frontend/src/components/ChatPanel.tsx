@@ -13,7 +13,7 @@ import {
   User,
 } from "lucide-react";
 import BrandLogo from "./common/AIAsstAvatar";
-import { Button, Card, Input, Textarea } from "../ui";
+import { Button, Card, Input, Textarea } from "./ui";
 import { getChat, getChats, streamMessage } from "@/services/apis/api";
 import type { ChatSummary, Message } from "../types";
 import { toast } from "sonner";

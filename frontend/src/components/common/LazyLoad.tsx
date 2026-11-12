@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Outlet } from "react-router-dom";
-import { Spinner } from "@/ui";
+import { Spinner } from "@/components/ui";
 
 
 const LazyLoader = () => {

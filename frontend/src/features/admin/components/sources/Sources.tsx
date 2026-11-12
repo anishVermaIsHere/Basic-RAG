@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FileText, ChevronDown, ChevronUp, MessageSquare, Search } from "lucide-react";
-import { Card, Input, Badge, Spinner } from "@/ui";
+import { Card, Input, Badge, Spinner } from "@/components/ui";
 import { getSources, getSourceStats } from "@/services/apis/api";
 import { date } from "@/lib";
 import type { Source, SourceStat } from "@/types";

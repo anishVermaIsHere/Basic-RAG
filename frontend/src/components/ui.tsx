@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "./lib";
+import { cn } from "../lib";
 import { Slot } from "@radix-ui/react-slot";
 
 export function Button({

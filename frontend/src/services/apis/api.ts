@@ -3,14 +3,19 @@ import { api } from "@/services/apis";
 import type { StreamEvent } from "@/types";
 
 
-const { CHAT, AUTH, SOURCES } = API_ENDPOINTS;
+const { CHAT, AUTH, USER, SOURCES } = API_ENDPOINTS;
+
 
 export async function authLogin(credentials: any){
-   return await api.post<any>(AUTH.login, credentials);
+  return await api.post<any>(AUTH.login, credentials);
 }
 
 export async function authLogout(){
-   return await api.post<any>(AUTH.logout, null);
+  return await api.post<any>(AUTH.logout, null);
+}
+
+export async function getSelf(){
+  return await api.get<any>(USER.me);
 }
 
 export async function sendMessage(message: any){

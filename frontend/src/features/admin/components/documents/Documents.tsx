@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, RefreshCw, Search, UploadCloud } from "lucide-react";
-import { Button, Input, Card } from "@/ui";
+import { Button, Input, Card } from "@/components/ui";
 import { api } from "@/services/apis";
 import { toast } from "sonner";
 import type { Doc } from "@/types";

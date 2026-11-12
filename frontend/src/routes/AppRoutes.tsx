@@ -1,29 +1,31 @@
 import LazyLoader, { ChatPage, DocumentsPage, SettingsPage, LoginPage, KnowledgeBasePage } from "@/components/common/LazyLoad"
-import AppLayout from "@/components/common/AppLayout";
+import AuthLayout from "@/components/common/AuthLayout";
+import ROUTES from "./routes";
 
 
+const { DOCS, SETTINGS, CHAT, KNOWLEDGE } = ROUTES;
 
 const appRoutes = [
    {
-    element: <AppLayout />,
+    element: <AuthLayout />,
     children: [
       {
         element: <LazyLoader />,
         children: [
           {
-            path: '/documents',
+            path: DOCS.path,
             element: <DocumentsPage />,
           },
            {
-            path: '/knowledgebase',
+            path: KNOWLEDGE.path,
             element: <KnowledgeBasePage />,
           },
            {
-            path: '/settings',
+            path: SETTINGS.path,
             element: <SettingsPage />,
           },
           {
-            path: '/chat',
+            path: CHAT.path,
             element: <ChatPage />,
           },
         ],

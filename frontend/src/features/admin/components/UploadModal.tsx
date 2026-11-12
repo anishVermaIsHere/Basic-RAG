@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, FileText, UploadCloud, X, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Spinner } from "@/ui";
+import { Button, Spinner } from "@/components/ui";
 import { uploadFile } from "../apis/document";
 import { bytes } from "@/lib";
 import { ALLOWED_EXTS, MAX_FILE_SIZE } from "@/utils/constant";

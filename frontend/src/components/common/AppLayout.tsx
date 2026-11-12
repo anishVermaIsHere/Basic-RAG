@@ -13,25 +13,15 @@ import {
   Search,
   User,
 } from "lucide-react";
-import { Button, Input } from "@/ui";
+import { Button, Input } from "@/components/ui";
 import AppConfig from "@/config/config"
-import { api } from "@/services/apis";
-import { API_ENDPOINTS } from "@/services/apis/endpoints";
+import ROUTES  from "@/routes/routes";
 import { authLogout } from "@/services/apis/api";
+// import AuthLayout from "./AuthLayout";
 
-const links = [
-  ["/chat", "Chat", MessageSquare],
-  ["/documents", "Documents", FileText],
-  ["knowledgebase", "Knowledge Base", FileText],
-  // ["/sources", "Sources", Database],
-  ["/settings", "Settings", Settings],
-] as const;
-
-const profileLinks = [
-  ["/settings", "My Profile", User],
-  ["/documents", "My Documents", FileText],
-  ["/settings", "Settings", Settings],
-] as const;
+const { SETTINGS, KNOWLEDGE, DOCS, CHAT, PROFILE } = ROUTES;
+const links = [CHAT, DOCS, KNOWLEDGE, SETTINGS] as const;
+const profileLinks = [PROFILE, DOCS, SETTINGS] as const;
 
 export default function AppLayout() {
   const [dark, setDark] = useState(localStorage.getItem("theme") !== "light");
@@ -62,11 +52,13 @@ export default function AppLayout() {
       navigate("/", { replace: true });
     }
   };
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
-  const title = links.find((x) => x[0] === loc.pathname)?.[1] || "Workspace";
+  
+  const title = links.find((x) => x.path === loc.pathname)?.label || "Workspace";
 
   return (
     <div className="flex min-h-screen">
@@ -83,10 +75,10 @@ export default function AppLayout() {
           </div>
         </div>
         <nav className="flex-1 space-y-1 p-3">
-          {links.map(([to, label, Icon]) => (
+          {links.map(({ path, label, Icon }) => (
             <NavLink
-              key={to}
-              to={to}
+              key={label}
+              to={path}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-sm px-3 py-1.5 text-sm ${isActive ? "bg-primary text-muted" : "text-muted-foreground hover:bg-accent"}`
               }
@@ -139,10 +131,10 @@ export default function AppLayout() {
                   role="menu"
                   className="absolute right-0 top-11 z-30 w-52 rounded-xl border bg-card p-1 shadow-lg curosor-pointer"
                 >
-                  {profileLinks.map(([to, label, Icon]) => (
+                  {profileLinks.map(({ path, label, Icon }) => (
                     <NavLink
                       key={label}
-                      to={to}
+                      to={path}
                       role="menuitem"
                       onClick={() => setMenuOpen(false)}
                       className="flex items-center gap-3 rounded-sm px-3 py-2 text-sm text-muted-foreground hover:bg-accent"

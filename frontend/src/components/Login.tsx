@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
-import { Button, Card, Input } from "../ui";
+import { Button, Card, Input } from "./ui";
 import { toast } from "sonner";
 import { authLogin } from "@/services/apis/api";
 import AppConfig from "@/config/config";

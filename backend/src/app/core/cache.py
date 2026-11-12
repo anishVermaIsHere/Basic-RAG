@@ -1,13 +1,15 @@
 from redis.asyncio import Redis
 
 from app.utils.redis import RedisCache, NoOpCache
-from app.core.config import REDIS
+from app.core.config import Settings
 
+REDIS = Settings.REDIS
 
 redis_client: Redis | None = None
 
 async def init_redis() -> Redis | None:
     global redis_client
+    global REDIS
 
     if not REDIS['ENABLED']:
         redis_client = None

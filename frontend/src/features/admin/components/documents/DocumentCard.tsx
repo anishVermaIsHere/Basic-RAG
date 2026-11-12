@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, FileCode, FileText, FileType, Pencil, Trash2, X } from "lucide-react";
-import { Button, Input, Card, Badge } from "@/ui";
+import { Button, Input, Card, Badge } from "@/components/ui";
 import { bytes, date } from "@/lib";
 import type { Doc } from "@/types";
 
