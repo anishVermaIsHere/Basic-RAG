@@ -12,7 +12,7 @@ import {
   SlidersHorizontal,
   User,
 } from "lucide-react";
-import BrandLogo from "./common/AIAsstAvatar";
+import AIAssistantAvatar from "./common/AIAsstAvatar";
 import { Button, Card, Input, Textarea } from "./ui";
 import { getChat, getChats, streamMessage } from "@/services/apis/api";
 import type { ChatSummary, Message } from "../types";
@@ -218,7 +218,7 @@ export default function ChatPanel() {
                 <div
                   className={`grid size-8 shrink-0 place-items-center rounded-full ${m.role === "user" ? "bg-gray-600 text-background" : "bg-primary/10 text-white"}`}
                 >
-                  {m.role === "user" ? <User className="size-4"/> : <BrandLogo />}
+                  {m.role === "user" ? <User className="size-4"/> : <AIAssistantAvatar />}
                 </div>
                 <div className="max-w-[85%]">
                   <div
@@ -256,7 +256,7 @@ export default function ChatPanel() {
             {busy && msg[msg.length - 1]?.role === "user" && (
               <div className="flex gap-3">
                 <div className="grid size-9 place-items-center rounded-full bg-primary/10 text-white">
-                 <BrandLogo />
+                 <AIAssistantAvatar />
                 </div>
                 <div className="rounded-sm border bg-card px-2.5 py-1 text-sm text-muted-foreground leading-7">
                   Retrieving your request...

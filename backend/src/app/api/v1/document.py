@@ -4,7 +4,7 @@ import tempfile
 
 from pathlib import Path
 from openai import OpenAI
-from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Query, Request, UploadFile
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -14,6 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.pipeline import ingest_document
 from app.core.config import settings
 from app.db.database import get_db
+from app.core.cache import get_redis
+from app.utils.redis import Cache
 from app.services.doc_upload_service import DocUploadService
 from app.services.document_service import DocumentService
 
@@ -37,8 +39,8 @@ def send_message(text: str):
 
 
 @router.get("/", response_class=JSONResponse, status_code=200, summary="List of all documents")
-async def get_documents(db: AsyncSession = Depends(get_db)):
-    return jsonable_encoder(await DocumentService().get(db))
+async def get_documents(req: Request, db: AsyncSession = Depends(get_db), redis: Cache = Depends(get_redis)):
+    return jsonable_encoder(await DocumentService().get(req, db, redis))
 
 @router.post("/upload", response_class=JSONResponse, status_code=201, summary="Upload document", description="Accepts a file (pdf, docx, txt, md up to 10 MB), stores it in Cloudinary and saves a document record.")
 async def upload_file(file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):

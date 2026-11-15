@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import { Button, Card, Input } from "./ui";
+import AIAssistantAvatar from "@/components/common/AIAsstAvatar"
 import { toast } from "sonner";
 import { authLogin } from "@/services/apis/api";
 import AppConfig from "@/config/config";
+
 
 
 export default function Login() {
@@ -34,8 +36,8 @@ export default function Login() {
     <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_top,rgba(124,58,237,.18),transparent_42%)] p-4">
       <Card className="w-full max-w-md p-7 shadow-2xl">
         <div className="text-center">
-          <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary text-white">
-            <Sparkles />
+          <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-white">
+            <AIAssistantAvatar />
           </div>
           <h1 className="mt-4 text-2xl font-semibold">Welcome back</h1>
           <p className="mt-1 text-sm text-muted-foreground">

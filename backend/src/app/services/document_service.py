@@ -1,18 +1,36 @@
 import uuid
 import logging
+import json
 
-from fastapi import HTTPException
+from fastapi import Request, HTTPException, status
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 from app.db.models import Document, DocChunk
+from app.utils.redis import Cache
 from app.services.doc_upload_service import DocUploadService
 
 logger = logging.getLogger(__name__)
 
 
 class DocumentService:
-   async def get(self, db: AsyncSession):
+   async def get(self, req: Request, db: AsyncSession, redis: Cache):
+      current_user = req.state.user
+      user_id = current_user.get('sub')
+      cached_documents_key = f"user:{user_id}:documents"
+      cached_documents = await redis.get(cached_documents_key)
+
+
+      if cached_documents is not None:
+        documents = json.loads(cached_documents)
+
+        if not documents:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Documents not found")
+
+        return documents
+
       # one query: each document plus how many chunks it has
       stmt = (
          select(Document, func.count(DocChunk.id).label("chunk_count"))
@@ -22,7 +40,7 @@ class DocumentService:
       )
       result = await db.execute(stmt)
 
-      return [
+      db_documents = [
          {
             "id": str(document.id),
             "filename": document.filename,
@@ -35,6 +53,12 @@ class DocumentService:
          }
          for document, chunk_count in result.all()
       ]
+      await redis.set(cached_documents_key, json.dumps(jsonable_encoder(db_documents)), ex=600)
+
+      if not db_documents:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Documents not found")
+      
+      return db_documents
 
    async def create(self, db: AsyncSession, filename: str, file_path: str):
       if not filename:
