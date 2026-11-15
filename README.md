@@ -40,9 +40,10 @@ Look RAG lets you upload your own documents and chat with them. Uploaded files a
 
 ## Screens
 
-<video width="700" controls>
-  <source src="./Screen-Recording.mp4" type="video/mp4">
-</video>
+
+https://github.com/user-attachments/assets/2d5af817-84f8-47a4-9a1f-1578bce5c30e
+
+
 
 ## Project Structure
 
