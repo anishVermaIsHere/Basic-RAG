@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from sqlalchemy.orm import configure_mappers
 
 from app.db.database import init_db, close_db
+from app.core.cache import init_redis, close_redis
 from app.api.v1.health import router as health_router
 from app.api.v1.document import router as document_router
 from app.api.v1.query import router as query_router
@@ -19,11 +20,13 @@ from app.utils.auth_middleware import AuthMiddleware
 async def lifespan(app: FastAPI):
     # Run decoupled startup logic
     await init_db()
+    await init_redis()
     
     yield  # Hand over control to FastAPI to process incoming requests
 
     # Run decoupled shutdown logic
     await close_db()
+    await close_redis()
 
 
 configure_mappers()

@@ -115,7 +115,7 @@ class AuthService():
         user_data.pop("created_at", None)
         safe_user_data = jsonable_encoder(user_data)
 
-        await redis.set(user_cache_key, json.dumps(safe_user_data), expire=600)
+        await redis.set(user_cache_key, json.dumps(safe_user_data), ex=600)
 
         return {"authenticated": True, "user": safe_user_data }
         

@@ -11,13 +11,13 @@ async def init_redis() -> Redis | None:
     global redis_client
     global REDIS
 
-    if not REDIS['ENABLED']:
+    if not REDIS.ENABLED:
         redis_client = None
         return None
 
     redis_client = RedisCache(
-        host=REDIS["HOST"],
-        port=REDIS["PORT"],
+        host=REDIS.HOST,
+        port=REDIS.PORT,
         decode_responses=True,
         max_connections=10
     )
@@ -36,8 +36,9 @@ async def get_redis() -> Redis:
 async def close_redis() -> None:
     global redis_client
     if redis_client is None:
-        return NoOpCache()
+        return 
 
-    await redis_client.close()
+    await redis_client.aclose()
+    redis_client = None
     print("Redis closed")
 
