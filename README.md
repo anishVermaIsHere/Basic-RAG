@@ -40,8 +40,8 @@ Look RAG lets you upload your own documents and chat with them. Uploaded files a
 
 ## Screens
 
-![](./001.png)
-![](./002.png)
+[Watch Demo](./Screen-Recording.mp4)
+
 
 ## Project Structure
 
