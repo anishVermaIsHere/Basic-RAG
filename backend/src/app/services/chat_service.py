@@ -22,6 +22,7 @@ from app.utils.chat import generate_chat_title, convert_messages
 class ChatService:
     async def stream_message(self, user_id: uuid.UUID, chat_id: uuid.UUID, db: AsyncSession, payload: MessagePayload):
         message_service = MessageService()
+        SIMILARITY_THRESHOLD = 0.45
 
         # Save user message
         await message_service.create(
@@ -88,7 +89,9 @@ class ChatService:
                     "score": getattr(c, "score", None),
                 }
                 for c in chunks
+                if c.score >= SIMILARITY_THRESHOLD
             ]
+
             pages = sorted({c.page_number for c in chunks if c.page_number is not None})
             yield {"type": "sources", "content": "", "page": pages, "sources": sources}
 
